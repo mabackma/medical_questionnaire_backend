@@ -32,12 +32,12 @@ def get_questions():
 def save_answers():
     try:
         request_data = request.get_json()
-
+        print(request_data)
         for answer_data in request_data:
             # save answer to database with question id in objectId format
             database['answers'].insert_one({
                 'question_id': ObjectId(answer_data['question_id']),
-                'answer': answer_data['answer']
+                'choice': answer_data['choice']
             })
             print("inserted answers: ", request_data)
 
