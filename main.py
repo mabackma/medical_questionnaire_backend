@@ -32,7 +32,7 @@ def get_questions():
 def save_answers():
     try:
         request_data = request.get_json()
-        print(request_data)
+
         for answer_data in request_data:
             # save answer to database with question id in objectId format
             database['answers'].insert_one({
