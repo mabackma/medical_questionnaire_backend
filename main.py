@@ -33,13 +33,16 @@ def save_answers():
     try:
         request_data = request.get_json()
 
-        # save answer to database with question id in objectId format
-        database['answers'].insert_one(
-            {'question_id': ObjectId(request_data['question_id']), 'answer': request_data['answer']})
-        print("inserted answer: ", request_data)
+        for answer_data in request_data:
+            # save answer to database with question id in objectId format
+            database['answers'].insert_one({
+                'question_id': ObjectId(answer_data['question_id']),
+                'answer': answer_data['answer']
+            })
+            print("inserted answers: ", request_data)
 
         # Return a success message
-        return jsonify({"message": "Answer saved successfully"}), 200
+        return jsonify({"message": "Answers saved successfully"}), 200
     except Exception as e:
         return f'Error: {e}'
 
