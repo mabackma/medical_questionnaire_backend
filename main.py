@@ -7,6 +7,7 @@ from pymongo import MongoClient
 load_dotenv()
 mongodb_key = os.getenv('MONGODB_KEY')
 client = MongoClient(mongodb_key)
+database = client['questionnaire']
 
 app = Flask(__name__)
 CORS(app)
@@ -14,15 +15,19 @@ CORS(app)
 @app.route('/questionnaire', methods=['GET'])
 def get_questions():
     try:
-        # exclude id objects in the query
-        questions = client['questionnaire']['questions'].find({}, {"_id": 0})
-        return jsonify(list(questions))
+        questions = database['questions'].find()
+
+        # iterate over each document in cursor and make create a list
+        questions_data = [question for question in questions]
+        for question in questions_data:
+            question['_id'] = str(question['_id'])
+        return jsonify(questions_data)
 
     except Exception as e:
         return f'Error: {e}'
 
 '''''
-@app.route('/save_to_database', methods=['POST'])
+@app.route('/answers', methods=['POST'])
 def save_answers():
     try:
 
