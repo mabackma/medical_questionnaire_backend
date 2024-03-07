@@ -42,7 +42,7 @@ def save_answers():
             print("inserted answers: ", request_data)
 
         # Return a success message
-        return jsonify({"message": "Answers saved successfully"}), 200
+        return jsonify({"message": "Answers saved successfully"}), 201
     except Exception as e:
         return f'Error: {e}'
 
