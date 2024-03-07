@@ -39,7 +39,7 @@ def save_answers():
                 'question_id': ObjectId(answer_data['question_id']),
                 'choice': answer_data['choice']
             })
-            print("inserted answers: ", request_data)
+        print("inserted answers: ", request_data)
 
         # Return a success message
         return jsonify({"message": "Answers saved successfully"}), 201
