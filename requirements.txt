@@ -1,4 +1,7 @@
-flask
+flask~=3.0.2
 flask-cors
-python-dotenv
-pymongo
+python-dotenv~=1.0.1
+pymongo~=4.6.2
+openai-whisper
+openai
+whisper
