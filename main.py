@@ -54,7 +54,7 @@ def speech_to_text_api():
 
         # return the recognized text
         print(result.text)
-        return result.text
+        return {"user_answer": result.text}
 
     except Exception as e:
         return f'Error: {e}'
@@ -84,7 +84,7 @@ def save_answers():
             # save answer to database with question id in objectId format
             database['answers'].insert_one({
                 'question_id': ObjectId(answer_data['question_id']),
-                'choice': answer_data['choice']
+                'user_answer': answer_data['user_answer'],
             })
         print("inserted answers: ", request_data)
 
