@@ -5,6 +5,7 @@ from flask_cors import CORS
 import os
 from pymongo import MongoClient
 import whisper
+import torch
 
 load_dotenv()
 mongodb_key = os.getenv('MONGODB_KEY')
@@ -19,8 +20,9 @@ UPLOAD_FOLDER = 'C:/temp_whisper_uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Whisper model
-#model = whisper.load_model("base")
-model = whisper.load_model("large")
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = whisper.load_model('large').to(device)
+
 
 # Whisper translates speech to text from file
 @app.route('/stt', methods=['POST'])
