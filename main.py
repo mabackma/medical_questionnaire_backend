@@ -18,6 +18,9 @@ CORS(app)
 UPLOAD_FOLDER = 'C:/temp_whisper_uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Whisper model
+#model = whisper.load_model("base")
+model = whisper.load_model("large")
 
 # Whisper translates speech to text from file
 @app.route('/stt', methods=['POST'])
@@ -34,27 +37,12 @@ def speech_to_text_api():
         unique_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'uploaded_audio.wav')
         audio_file.save(unique_filename)
 
-        model = whisper.load_model("base")
+        print("perfoming speech-to-text...")
+        out = model.transcribe(unique_filename, language="finnish", fp16=False)
+        print(out['text'])
 
-        # load audio and pad/trim it to fit 30 seconds
-        audio = whisper.load_audio(unique_filename)
-        audio = whisper.pad_or_trim(audio)
-
-        # make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio).to(model.device)
-
-        # detect the spoken language
-        _, probs = model.detect_language(mel)
-        print(f"filename: {audio_file.filename}")
-        print(f"Detected language: {max(probs, key=probs.get)}")
-
-        # decode the audio
-        options = whisper.DecodingOptions(fp16=False)
-        result = whisper.decode(model, mel, options)
-
-        # return the recognized text
-        print(result.text)
-        return {"user_answer": result.text}
+        # Return the text from speech
+        return {"user_answer": out['text']}
 
     except Exception as e:
         return f'Error: {e}'
