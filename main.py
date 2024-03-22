@@ -59,6 +59,7 @@ def get_questions():
         questions_data = [question for question in questions]
         for question in questions_data:
             question['_id'] = str(question['_id'])
+
         return jsonify(questions_data)
 
     except Exception as e:
@@ -70,12 +71,18 @@ def save_answers():
     try:
         request_data = request.get_json()
 
-        for answer_data in request_data:
-            # save answer to database with question id in objectId format
-            database['answers'].insert_one({
+        answers_list = []
+        for answer_data in request_data['answers']:
+            answers_list.append({
                 'question_id': ObjectId(answer_data['question_id']),
                 'user_answer': answer_data['user_answer'],
             })
+
+        user_answers = {
+            'user': request_data['user'],
+            'answers': answers_list
+        }
+        database['answers'].insert_one(user_answers)
         print("inserted answers: ", request_data)
 
         # Return a success message
