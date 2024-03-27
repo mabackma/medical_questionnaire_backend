@@ -33,7 +33,7 @@ async def get_summary():
         for answer_obj in answers:
             for ans in answer_obj['answers']:
                 if str(ans['question_id']) == question_id:
-                    q_and_a_list.append(f"{question['question']}: {ans['user_answer']}")
+                    q_and_a_list.append(f"DOCTOR: {question['question']} PATIENT: {ans['user_answer']}")
 
     # Prepare a text input for the summary
     text_for_summary = await prepare_text(q_and_a_list)
