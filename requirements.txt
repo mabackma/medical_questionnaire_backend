@@ -10,3 +10,6 @@ whisper
 torch
 torchvision
 torchaudio
+
+pandas
+pyspark==3.2.2
