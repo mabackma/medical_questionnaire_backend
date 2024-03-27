@@ -1,3 +1,4 @@
+# WORKS WITH PYTHON 3.8
 from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
@@ -21,6 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Whisper model
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print('Using device:', device)
 model = whisper.load_model('large').to(device)
 
 

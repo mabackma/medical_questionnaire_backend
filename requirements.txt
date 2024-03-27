@@ -1,4 +1,4 @@
-flask~=3.0.2
+flask[async]
 flask-cors
 python-dotenv
 pymongo~=4.6.2

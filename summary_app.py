@@ -1,0 +1,74 @@
+# WORKS WITH PYTHON 3.10
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import os
+from pymongo import MongoClient
+from openai import OpenAI
+
+load_dotenv()
+mongodb_key = os.getenv('MONGODB_KEY')
+client = MongoClient(mongodb_key)
+database = client['questionnaire']
+
+app = Flask(__name__)
+CORS(app)
+
+# chat-gpt
+client_gpt = OpenAI(api_key=os.getenv("CHAT_GPT_KEY"))
+
+
+@app.route('/get_summary', methods=['POST'])
+async def get_summary():
+    user = request.json['user']
+
+    questions = list(database['questions'].find())
+    answers = list(database['answers'].find({'user': user}))
+
+    # List of strings for question and answer pairs
+    q_and_a_list = []
+
+    for question in questions:
+        question_id = str(question['_id'])
+        for answer_obj in answers:
+            for ans in answer_obj['answers']:
+                if str(ans['question_id']) == question_id:
+                    q_and_a_list.append(f"{question['question']}: {ans['user_answer']}")
+
+    # Prepare a text input for the summary
+    text_for_summary = await prepare_text(q_and_a_list)
+    print(text_for_summary)
+
+    return jsonify({"text_for_summary": text_for_summary})
+
+
+# Asynchronous function to prepare the text for summary
+async def prepare_text(q_and_a_list):
+    text_for_summary = ""
+    for pair in q_and_a_list:
+        english_pair = await translate_to_english(pair)
+        text_for_summary += english_pair + ". "
+    return text_for_summary
+
+
+# Translates finnish to english
+async def translate_to_english(pair):
+    prompt = f"Translate the following text into english: {pair}"
+
+    chat_completion = client_gpt.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        model="gpt-3.5-turbo"
+    )
+
+    reply = chat_completion.choices[0].message.content
+    return reply
+
+
+if __name__ == "__main__":
+
+    app.run(debug=True, port=5002)
