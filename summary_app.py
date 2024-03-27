@@ -59,9 +59,13 @@ async def get_summary():
     text_for_summary = await prepare_text(q_and_a_list)
     print(text_for_summary)
 
-    # summarize the text
+    # summarize the text input
     summary = summarize(pipeline, text_for_summary)
-    return jsonify({'summary': summary})
+    print(summary)
+
+    # Translate the summary back to finnish
+    finnish_summary = await translate_to_finnish(summary)
+    return jsonify({'summary': finnish_summary})
 
 
 def summarize(pipeline, input_text):
@@ -90,6 +94,24 @@ async def prepare_text(q_and_a_list):
 # Translates finnish to english
 async def translate_to_english(pair):
     prompt = f"Translate the following text into english: {pair}"
+
+    chat_completion = client_gpt.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        model="gpt-3.5-turbo"
+    )
+
+    reply = chat_completion.choices[0].message.content
+    return reply
+
+
+# Translates english to finnish
+async def translate_to_finnish(english_summary):
+    prompt = f"Käännä seuraava teksti suomeksi: {english_summary}"
 
     chat_completion = client_gpt.chat.completions.create(
         messages=[
