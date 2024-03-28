@@ -45,27 +45,33 @@ async def get_summary():
     questions = list(database['questions'].find())
     answers = list(database['answers'].find({'user': user}))
 
-    # List of strings for question and answer pairs
-    q_and_a_list = []
+    # List of summaries for each subject
+    finnish_summaries = []
 
-    for question in questions:
-        question_id = str(question['_id'])
-        for answer_obj in answers:
+    for answer_obj in answers:
+        # List of strings for question and answer pairs
+        q_and_a_list = []
+
+        for question in questions:
+            question_id = str(question['_id'])
             for ans in answer_obj['answers']:
                 if str(ans['question_id']) == question_id:
-                    q_and_a_list.append(f"DOCTOR: {question['question']} PATIENT: {ans['user_answer']}")
+                    q_and_a_list.append(f"\nDOCTOR: {question['question']}\nSUBJECT: {ans['user_answer']}\n")
 
-    # Prepare a text input for the summary
-    text_for_summary = await prepare_text(q_and_a_list)
-    print(text_for_summary)
+        # Prepare a text input for the summary
+        text_for_summary = await prepare_text(q_and_a_list)
 
-    # summarize the text input
-    summary = summarize(pipeline, text_for_summary)
-    print(summary)
+        # summarize the text input
+        summary = summarize(pipeline, text_for_summary)
+        print('summary:\n', summary)
 
-    # Translate the summary back to finnish
-    finnish_summary = await translate_to_finnish(summary)
-    return jsonify({'summary': finnish_summary})
+        # Translate the summary back to finnish
+        finnish_summary = await translate_to_finnish(summary)
+        print('finnish:\n', finnish_summary)
+
+        finnish_summaries.append(finnish_summary)
+
+    return jsonify({'summaries': finnish_summaries})
 
 
 def summarize(pipeline, input_text):
@@ -88,6 +94,7 @@ async def prepare_text(q_and_a_list):
     for pair in q_and_a_list:
         english_pair = await translate_to_english(pair)
         text_for_summary += english_pair + ". "
+    print("text for summary:", text_for_summary)
     return text_for_summary
 
 
