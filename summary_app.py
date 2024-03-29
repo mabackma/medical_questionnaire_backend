@@ -1,5 +1,5 @@
 # WORKS WITH PYTHON 3.9
-import sparknlp
+from bson import json_util
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -38,40 +38,66 @@ spark.sparkContext.setLogLevel("ERROR")
 pipeline = PretrainedPipeline("summarizer_clinical_laymen_onnx_pipeline", "en", "clinical/models")
 
 
-@app.route('/get_summary', methods=['POST'])
-async def get_summary():
-    user = request.json['user']
+# Asynchronous function to prepare the text for summary
+async def prepare_text(q_and_a_list):
+    print('q_and_a_list: ', q_and_a_list)
+    text_for_summary = ""
+    for pair in q_and_a_list:
+        english_pair = await translate_to_english(pair)
+        text_for_summary += english_pair + ". "
+    print("text for summary:", text_for_summary)
+    return text_for_summary
 
-    questions = list(database['questions'].find())
-    answers = list(database['answers'].find({'user': user}))
 
-    # List of summaries for each subject
-    finnish_summaries = []
+@app.route('/make_summary', methods=['POST'])
+async def make_summary():
+    try:
+        request_data = request.get_json()
+        user = request_data['user']
 
-    for answer_obj in answers:
-        # List of strings for question and answer pairs
-        q_and_a_list = []
+        # list of q and a strings
+        q_and_a_list_to_translate = []
+        for answer_data in request_data['answers']:
+            string_to_translate = f"DOCTOR: {answer_data['question']} SUBJECT: {answer_data['user_answer']}"
+            q_and_a_list_to_translate.append(string_to_translate)
 
-        for question in questions:
-            question_id = str(question['_id'])
-            for ans in answer_obj['answers']:
-                if str(ans['question_id']) == question_id:
-                    q_and_a_list.append(f"\nDOCTOR: {question['question']}\nSUBJECT: {ans['user_answer']}\n")
+        # String for Spark NLP to summarize
+        string_to_summarize = await prepare_text(q_and_a_list_to_translate)
 
-        # Prepare a text input for the summary
-        text_for_summary = await prepare_text(q_and_a_list)
-
-        # summarize the text input
-        summary = summarize(pipeline, text_for_summary)
+        # Summarize the text from all the question answer pairs
+        summary = summarize (pipeline, string_to_summarize)
         print('summary:\n', summary)
 
         # Translate the summary back to finnish
         finnish_summary = await translate_to_finnish(summary)
         print('finnish:\n', finnish_summary)
 
-        finnish_summaries.append(finnish_summary)
+        database['summaries'].insert_one({'user': user, 'summary': finnish_summary})
 
-    return jsonify({'summaries': finnish_summaries})
+        # Return a success message
+        return jsonify({"message": "Summary saved successfully"}), 201
+
+    except Exception as e:
+        return f'Error: {e}'
+
+
+def document_to_dict(document):
+    # Convert ObjectId to string
+    document['_id'] = str(document['_id'])
+    # Return the document as a dictionary
+    return document
+
+
+@app.route('/get_summary', methods=['POST'])
+async def get_summary():
+    user = request.json['user']
+    result = database['summaries'].find({'user': user})
+
+    # Convert MongoDB documents to dictionaries
+    summaries = [document_to_dict(document) for document in result]
+
+    print('SUMMARIES:', summaries)
+    return jsonify({'summaries': summaries})
 
 
 def summarize(pipeline, input_text):
@@ -86,16 +112,6 @@ def summarize(pipeline, input_text):
     text = text.replace("'", '').replace('"', '').replace('result=', '')
 
     return text
-
-
-# Asynchronous function to prepare the text for summary
-async def prepare_text(q_and_a_list):
-    text_for_summary = ""
-    for pair in q_and_a_list:
-        english_pair = await translate_to_english(pair)
-        text_for_summary += english_pair + ". "
-    print("text for summary:", text_for_summary)
-    return text_for_summary
 
 
 # Translates finnish to english
