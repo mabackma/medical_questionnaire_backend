@@ -39,10 +39,10 @@ pipeline = PretrainedPipeline("summarizer_clinical_laymen_onnx_pipeline", "en", 
 
 
 # Asynchronous function to prepare the text for summary
-async def prepare_text(q_and_a_list):
-    print('q_and_a_list: ', q_and_a_list)
+async def prepare_text(answer_list):
+    print('answer_list: ', answer_list)
     text_for_summary = ""
-    for pair in q_and_a_list:
+    for pair in answer_list:
         english_pair = await translate_to_english(pair)
         text_for_summary += english_pair + ". "
     print("text for summary:", text_for_summary)
@@ -56,13 +56,13 @@ async def make_summary():
         user = request_data['user']
 
         # list of q and a strings
-        q_and_a_list_to_translate = []
+        answer_list_to_translate = []
         for answer_data in request_data['answers']:
             string_to_translate = f"{user} {answer_data['user_answer']}"
-            q_and_a_list_to_translate.append(string_to_translate)
+            answer_list_to_translate.append(string_to_translate)
 
         # String for Spark NLP to summarize
-        string_to_summarize = await prepare_text(q_and_a_list_to_translate)
+        string_to_summarize = await prepare_text(answer_list_to_translate)
 
         # Summarize the text from all the question answer pairs
         summary = summarize (pipeline, string_to_summarize)
