@@ -58,7 +58,7 @@ async def make_summary():
         # list of q and a strings
         q_and_a_list_to_translate = []
         for answer_data in request_data['answers']:
-            string_to_translate = f"DOCTOR: {answer_data['question']} SUBJECT: {answer_data['user_answer']}"
+            string_to_translate = f"{user} {answer_data['user_answer']}"
             q_and_a_list_to_translate.append(string_to_translate)
 
         # String for Spark NLP to summarize
