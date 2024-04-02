@@ -4,7 +4,6 @@ python-dotenv
 pymongo~=4.6.2
 openai-whisper
 openai
-whisper
 
 --extra-index-url https://download.pytorch.org/whl/cu121
 torch
