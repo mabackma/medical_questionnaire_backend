@@ -1,5 +1,3 @@
-# WORKS WITH PYTHON 3.9
-from bson import json_util
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
