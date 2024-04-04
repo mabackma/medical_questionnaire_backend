@@ -1,3 +1,4 @@
+import json
 from bson import ObjectId
 import whisper
 import torch
@@ -15,6 +16,12 @@ load_dotenv()
 mongodb_key = os.getenv('MONGODB_KEY')
 client = MongoClient(mongodb_key)
 database = client['questionnaire']
+
+# Upload questions to database
+if "questions" not in database.list_collection_names():
+    with open('questionnaire.json', 'r', encoding='utf-8') as file:
+        questionnaire = json.load(file)
+    database['questions'].insert_many(questionnaire)
 
 app = Flask(__name__)
 CORS(app)
@@ -150,7 +157,7 @@ async def make_summary():
         finnish_summary = await translate_to_finnish(summary)
         print('finnish:\n', finnish_summary)
 
-        database['summaries'].insert_one({'user': user, 'summary': finnish_summary})
+        database['summaries'].insert_one({'user': user, 'input_string': " ".join(answer_list_to_translate), 'summary': finnish_summary})
 
         # Return a success message
         return jsonify({"message": "Summary saved successfully"}), 201
