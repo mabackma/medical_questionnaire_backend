@@ -129,7 +129,7 @@ async def prepare_text(answer_list):
     text_for_summary = ""
     for pair in answer_list:
         english_pair = await translate_to_english(pair)
-        text_for_summary += english_pair + ". "
+        text_for_summary += english_pair + " "
     print("text for summary:", text_for_summary)
     return text_for_summary
 
@@ -157,7 +157,11 @@ async def make_summary():
         finnish_summary = await translate_to_finnish(summary)
         print('finnish:\n', finnish_summary)
 
-        database['summaries'].insert_one({'user': user, 'input_string': " ".join(answer_list_to_translate), 'summary': finnish_summary})
+        database['summaries'].insert_one({'user': user,
+                                          'input_string': " ".join(answer_list_to_translate),
+                                          'english_input_string': string_to_summarize,
+                                          'english_summary': summary,
+                                          'summary': finnish_summary})
 
         # Return a success message
         return jsonify({"message": "Summary saved successfully"}), 201
