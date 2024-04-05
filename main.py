@@ -127,9 +127,13 @@ def save_answers():
 async def prepare_text(answer_list):
     print('answer_list: ', answer_list)
     text_for_summary = ""
-    for pair in answer_list:
-        english_pair = await translate_to_english(pair)
-        text_for_summary += english_pair + " "
+    for user_answer in answer_list:
+        # Only translate to english if answer is from speech
+        if user_answer.find("sanoo:") != -1:
+            english_answer = await translate_to_english(user_answer)
+            text_for_summary += english_answer + " "
+        else:
+            text_for_summary += user_answer + " "
     print("text for summary:", text_for_summary)
     return text_for_summary
 
@@ -204,8 +208,8 @@ def summarize(pipeline, input_text):
 
 
 # Translates finnish to english
-async def translate_to_english(pair):
-    prompt = f"Translate the following text into english: {pair}"
+async def translate_to_english(text):
+    prompt = f"Translate the following text into english: {text}"
 
     chat_completion = client_gpt.chat.completions.create(
         messages=[
