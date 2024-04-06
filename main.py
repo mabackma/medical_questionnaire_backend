@@ -125,7 +125,6 @@ def save_answers():
 
 # Asynchronous function to prepare the text for summary
 async def prepare_text(answer_list):
-    print('answer_list: ', answer_list)
     text_for_summary = ""
     for user_answer in answer_list:
         # Only translate to english if answer is from speech
@@ -144,10 +143,10 @@ async def make_summary():
         request_data = request.get_json()
         user = request_data['user']
 
-        # list of q and a strings
-        answer_list_to_translate = []
+        # list of answers
+        answer_list_to_translate = [f"{user['username']} is a {user['age']}-year-old {user['gender']}."]
         for answer_data in request_data['answers']:
-            string_to_translate = f"{user} {answer_data['user_answer']}"
+            string_to_translate = f"{user['username']} {answer_data['user_answer']}"
             answer_list_to_translate.append(string_to_translate)
 
         # String for Spark NLP to summarize
