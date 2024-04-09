@@ -188,7 +188,6 @@ async def get_summary():
     # Convert MongoDB documents to dictionaries
     summaries = [document_to_dict(document) for document in result]
 
-    print('SUMMARIES:', summaries)
     return jsonify({'summaries': summaries})
 
 
@@ -240,6 +239,25 @@ async def translate_to_finnish(english_summary):
 
     reply = chat_completion.choices[0].message.content
     return reply
+
+
+@app.route('/physical', methods=['POST'])
+def save_physical():
+    try:
+        request_data = request.get_json()
+        print(request_data)
+        database['physical'].insert_one({
+            'user': request_data['user'],
+            'squat_count': request_data['squatCount'],
+            'leg_stand': request_data['legStand']
+        })
+        print("data received: ", request_data)
+
+        # Return a success message
+        return jsonify({"message": "Physical examination saved successfully"}), 201
+    except Exception as e:
+        print(f'Error: {e}')
+        return f'Error: {e}'
 
 
 if __name__ == "__main__":
