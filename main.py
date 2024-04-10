@@ -112,6 +112,7 @@ def save_answers():
 
         user_answers = {
             'user': request_data['user'],
+            'answer_date': request_data['answerDate'],
             'answers': answers_list
         }
         database['answers'].insert_one(user_answers)
@@ -142,6 +143,7 @@ async def make_summary():
     try:
         request_data = request.get_json()
         user = request_data['user']
+        answer_date = request_data['answerDate']
 
         # list of answers
         answer_list_to_translate = [f"{user['username']} is a {user['age']}-year-old {user['gender']}."]
@@ -153,7 +155,7 @@ async def make_summary():
         string_to_summarize = await prepare_text(answer_list_to_translate)
 
         # Summarize the text from all the question answer pairs
-        summary = summarize (pipeline, string_to_summarize)
+        summary = summarize(pipeline, string_to_summarize)
         print('summary:\n', summary)
 
         # Translate the summary back to finnish
@@ -161,6 +163,7 @@ async def make_summary():
         print('finnish:\n', finnish_summary)
 
         database['summaries'].insert_one({'user': user,
+                                          'answer_date': answer_date,
                                           'input_string': " ".join(answer_list_to_translate),
                                           'english_input_string': string_to_summarize,
                                           'english_summary': summary,
@@ -189,6 +192,25 @@ async def get_summary():
     summaries = [document_to_dict(document) for document in result]
 
     return jsonify({'summaries': summaries})
+
+
+@app.route('/get_summary_from_summaries', methods=['POST'])
+async def get_summary_from_summaries():
+    user = request.json['user']
+    result = database['summaries'].find({'user': user})
+
+    # Convert MongoDB documents to dictionaries
+    summaries = [document_to_dict(document) for document in result]
+
+    summary_history = ''
+
+    for summary in summaries:
+        summary_history += summary['answer_date'] + ": " + summary['english_summary'] + " "
+
+    summary_from_history_english = summarize(pipeline, summary_history)
+    summary_from_history = translate_to_finnish(summary_from_history_english)
+
+    return jsonify({'summary_from_history': summary_from_history})
 
 
 def summarize(pipeline, input_text):
