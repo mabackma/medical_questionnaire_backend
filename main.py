@@ -208,7 +208,7 @@ async def get_summary_from_summaries():
         summary_history += summary['answer_date'] + ": " + summary['english_summary'] + " "
 
     summary_from_history_english = summarize(pipeline, summary_history)
-    summary_from_history = translate_to_finnish(summary_from_history_english)
+    summary_from_history = await translate_to_finnish(summary_from_history_english)
 
     return jsonify({'summary_from_history': summary_from_history})
 
