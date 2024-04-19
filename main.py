@@ -155,7 +155,8 @@ async def make_summary():
         string_to_summarize = await prepare_text(answer_list_to_translate)
 
         # Summarize the text from all the question answer pairs
-        summary = summarize(pipeline, string_to_summarize)
+        # summary = summarize(pipeline, string_to_summarize)
+        summary = summarize_with_chat_gpt(string_to_summarize)
         print('summary:\n', summary)
 
         # Translate the summary back to finnish
