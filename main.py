@@ -227,6 +227,24 @@ def summarize(pipeline, input_text):
     return text
 
 
+# Summarize with chat GPT
+def summarize_with_chat_gpt(text):
+    prompt = f"Make a summary of this text: {text}"
+
+    chat_completion = client_gpt.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        model="gpt-3.5-turbo"
+    )
+
+    reply = chat_completion.choices[0].message.content
+    return reply
+
+
 # Translates finnish to english
 async def translate_to_english(text):
     prompt = f"Translate the following text into english: {text}"
