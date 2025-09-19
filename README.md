@@ -2,11 +2,11 @@
 
 This back end receives a number of answers from multiple choice questions and voice answers in audio files. 
 
-It uses Open AI's Whisper speech-to-text functionality running on an RTX 4070 Ti Super to convert the audio files into text answers.
+Uses Open AI's Whisper speech-to-text functionality running on an RTX 4070 Ti Super to convert the audio files into text answers.
 
 All the answers are then saved to a MongoDb database.
 
-It makes a summary from all the answers and sends the summary back to the front end.
+Makes a summary from all the answers and sends the summary back to the front end.
 
 This project was initially using a Spark NLP medical sumamarizer from [John Snow Labs](https://nlp.johnsnowlabs.com/medical_text_summarization) to make a summary of the answers.
 
