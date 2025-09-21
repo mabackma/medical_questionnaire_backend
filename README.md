@@ -12,6 +12,6 @@ This project was initially using a Spark NLP medical sumamarizer from [John Snow
 
 The summarizer was later changed to using Chat-GPT API. Also translations are made with Chat-GPT.
 
-[Flutter front end](https://github.com/mabackma/medical_questionnaire)
+[Flutter front end repository](https://github.com/mabackma/medical_questionnaire)
 
 [Video](https://www.youtube.com/watch?v=LpVu0fCTQkw)
