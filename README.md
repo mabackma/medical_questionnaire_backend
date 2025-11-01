@@ -1,4 +1,4 @@
-# Medical summary back end
+# Medical summary back end prototype
 
 This back end receives a number of answers from multiple choice questions and voice answers in audio files. 
 
